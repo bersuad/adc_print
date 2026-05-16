@@ -62,19 +62,30 @@ The module is built using a clean, layered architecture:
 
 ```text
 htdocs/custom/adceinvoice/
-├── admin/                  # Configuration & setup screens
-│   └── adceinvoice_setup.php
+├── admin/                  # Configuration & setup screens for the module
+│   └── adceinvoice_setup.php # The main configuration page where users set API URLs, credentials, TIN, and Device IDs. Handles testing the connection to the ADC API.
 ├── class/                  # Core models, DB wrappers, and data mappers
-├── core/                   # Dolibarr-specific integrations
-│   ├── modules/            # Module descriptor (modAdcEinvoice.class.php)
+│   ├── AdcInvoiceMapper.php  # (Phase 3) Maps internal Dolibarr invoice data (Facture) to the precise JSON structure required by the ADC MoR endpoints.
+│   └── AdcRetryQueue.php     # (Phase 4) Model handling the persistence and retrieval of failed API requests for idempotent background processing.
+├── core/                   # Dolibarr-specific integrations that wire the module into the ERP's lifecycle
+│   ├── modules/            
+│   │   └── modAdcEinvoice.class.php # The core module descriptor. Defines permissions, menus, version constraints, and handles module activation/deactivation.
 │   ├── hooks/              # UI Hooks
+│   │   └── invoicecard.php   # (Phase 3) Injects UI elements into the Dolibarr invoice screen (e.g., "Send to ADC", "Sync Status").
 │   └── triggers/           # Event triggers (e.g., on invoice validation)
-├── lib/                    # Reusable logic and API services
-│   ├── AdcApiClient.php    # cURL wrapper for API communication
-│   ├── AdcAuthService.php  # Token management service
-│   └── AdcLogger.php       # Centralized logging service
-├── sql/                    # PostgreSQL schema migrations
-└── README.md               # This documentation
+│       └── interface_adceinvoice.class.php # (Phase 3) Listens to native Dolibarr events like `BILL_VALIDATE` to automatically trigger API submissions.
+├── lib/                    # Reusable logic, shared utilities, and core API services
+│   ├── AdcApiClient.php    # A lightweight, standalone cURL wrapper that handles all HTTP communication, headers, JSON encoding/decoding, and timeouts.
+│   ├── AdcAuthService.php  # Token management service. It authenticates with `/udfs_api/authenticate`, caches the Bearer token in the DB, and auto-refreshes it when it expires.
+│   └── AdcLogger.php       # Centralized logging service. Wraps Dolibarr's `dol_syslog` to ensure all API transactions and module errors are consistently formatted and traceable.
+├── sql/                    # PostgreSQL schema migrations (executed automatically upon module activation)
+│   ├── llx_adc_auth_tokens.sql   # Table for caching API tokens and expiration times.
+│   ├── llx_adc_device_config.sql # Table for storing POS/Branch configurations.
+│   ├── llx_adc_invoice_logs.sql  # Audit trail table storing complete JSONB request/response payloads for every invoice sent.
+│   ├── llx_adc_print_logs.sql    # Audit trail for physical print commands sent to fiscal devices.
+│   ├── llx_adc_reports_cache.sql # Table for caching heavy Z-reports or summary data locally.
+│   └── llx_adc_retry_queue.sql   # The queue table used to store transient API failures for later background retry.
+└── README.md               # This documentation file providing module overview, installation, and architecture context.
 ```
 
 ### Database Tables
