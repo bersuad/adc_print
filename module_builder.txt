@@ -1,0 +1,23 @@
+# Dolibarr Module Builder Descriptor
+# Module: ADC eInvoicing Integration
+
+module=AdcEinvoice
+moduleversion=1.0.0
+dolibarrminversion=18.0
+dolibarrmaxversion=20.99
+
+name=ADC eInvoicing Integration
+description=Integrate Dolibarr ERP with ADC eInvoicing API for MoR compliance
+author=ADC Research and Development PLC
+authorurl=https://adc.com.et
+license=AGPL-3.0+
+category=Billing
+
+enabled=1
+configpage=adceinvoice_setup.php
+
+hooks=invoicecard,ordercard,payment
+
+permissions=adceinvoice:read,adceinvoice:write
+
+tables=llx_adceinvoice_queue

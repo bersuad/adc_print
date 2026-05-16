@@ -1,0 +1,82 @@
+# ADC eInvoicing Module - English Translations
+
+AdcEinvoiceSetup=ADC eInvoicing Configuration
+AdcEinvoiceModule=ADC eInvoicing Integration
+AdcEinvoiceSetupDesc=Configure integration with ADC eInvoicing API for MoR compliance
+
+ApiConfiguration=API Configuration
+AdcEinvoiceApiUrl=API Base URL
+AdcEinvoiceApiUrlDesc=Base URL for ADC eInvoicing API endpoints
+AdcEinvoiceApiUsername=API Username
+AdcEinvoiceApiUsernameDesc=Username for HTTP Basic Authentication
+AdcEinvoiceApiPassword=API Password
+AdcEinvoiceApiPasswordDesc=Password for HTTP Basic Authentication (stored encrypted)
+AdcEinvoiceTin=Taxpayer TIN
+AdcEinvoiceTinDesc=Your registered Taxpayer Identification Number
+AdcEinvoiceDeviceId=CRM Device ID
+AdcEinvoiceDeviceIdDesc=Identifier for your Neka + Printer device
+AdcEinvoiceClientType=Client Type
+AdcEinvoiceClientTypeDesc=Client identifier sent to API (WEB, POS, or MOBILE)
+
+BehaviorSettings=Sync Behavior
+AdcEinvoiceAutoSync=Auto-sync on Invoice Validation
+AdcEinvoiceAutoSyncDesc=Automatically submit invoices to ADC when validated in Dolibarr
+AdcEinvoicePrintEnabled=Enable Neka Printing
+AdcEinvoicePrintEnabledDesc=Print fiscal receipts via ADC CRM device after successful sync
+
+AdcEinvoiceTestConnection=Test API Connection
+AdcEinvoiceConnectionSuccess=✓ Successfully connected to ADC API
+AdcEinvoiceConnectionFailed=✗ Connection failed: %s
+
+ModuleStatus=Module Status
+SyncQueueSummary=Sync Queue Summary
+AdcEinvoiceStatusPending=...Pending
+AdcEinvoiceStatusProcessing=...Processing
+AdcEinvoiceStatusSynced=✓ Synced
+AdcEinvoiceStatusFailed=✗ Failed
+
+# Queue management
+AdcEinvoiceQueue=Sync Queue
+AdcEinvoiceQueueList=Pending Transactions
+AdcEinvoiceRetryNow=Retry Now
+AdcEinvoiceClearFailed=Clear Failed
+
+# Invoice fields
+AdcEinvoiceIRN=Invoice Registration Number
+AdcEinvoiceQRCode=QR Code Data
+AdcEinvoiceVoucherNo=Voucher Number
+AdcEinvoiceSyncStatus=ADC Sync Status
+AdcEinvoiceLastSync=Last Sync Attempt
+
+# Errors
+AdcEinvoiceErrorAuthFailed=Authentication failed. Check API credentials.
+AdcEinvoiceErrorTokenExpired=Access token expired. Re-authenticating...
+AdcEinvoiceErrorNetwork=Network error connecting to ADC API
+AdcEinvoiceErrorInvalidPayload=Invalid request payload
+AdcEinvoiceErrorDuplicateTrnx=Duplicate transaction ID
+AdcEinvoiceErrorInvoiceNotFound=Invoice not found in ADC system
+
+# Print
+AdcEinvoicePrinting=Printing via Neka...
+AdcEinvoicePrintSuccess=Receipt printed successfully
+AdcEinvoicePrintFailed=Failed to print receipt
+
+# Reports
+AdcEinvoiceReports=ADC Reports
+AdcEinvoiceDailyZ=Daily Z Report
+AdcEinvoiceXReport=X Report (Current)
+AdcEinvoiceSummaryZ=Summary Z Report
+AdcEinvoiceMiniReport=Mini Report
+
+# Invoice Card Integration
+AdcEinvoiceSyncStatus=ADC eInvoicing Status
+AdcEinvoiceNotSyncedYet=This invoice has not been registered with the MoR eInvoicing system yet.
+AdcEinvoiceStatusSynced=✓ Registered
+AdcEinvoiceInvoiceNo=ADC Invoice No
+AdcEinvoiceVerifyPortal=MoR Verification
+AdcEinvoiceViewOnMoR=View on MoR Portal
+AdcEinvoiceSyncNow=Sync to ADC Now
+AdcEinvoicePrintReceipt=Print Fiscal Receipt
+AdcEinvoicePrintSuccess=Fiscal receipt sent to printer
+AdcEinvoicePrintFailed=Failed to print receipt: %s
+AdcEinvoicePrintFailedNoData=Cannot print: ADC registration data missing

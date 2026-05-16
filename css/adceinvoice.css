@@ -1,0 +1,72 @@
+/**
+ * ADC eInvoicing Module - Frontend Styles
+ * Dolibarr Theme Compatible | No External Dependencies
+ */
+
+ .adceinvoice-status-box {
+    background: #f8f9fa;
+    border: 1px solid #e2e6ea;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+}
+.adceinvoice-status-box.success { border-left: 4px solid #28a745; }
+.adceinvoice-status-box.pending { border-left: 4px solid #ffc107; }
+.adceinvoice-status-box.error   { border-left: 4px solid #dc3545; }
+
+.adceinvoice-qr-container {
+    text-align: center;
+    padding: 8px;
+    background: #fff;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 5px 0;
+}
+.adceinvoice-qr-container img {
+    max-width: 150px;
+    height: auto;
+    display: block;
+}
+
+.adceinvoice-btn { margin-right: 5px; }
+.adceinvoice-btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: wait;
+}
+
+/* Queue Table Status Badges */
+.adceinvoice-badge {
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    display: inline-block;
+}
+.badge-synced     { background: #d4edda; color: #155724; }
+.badge-pending    { background: #fff3cd; color: #856404; }
+.badge-failed     { background: #f8d7da; color: #721c24; }
+.badge-processing { background: #cce5ff; color: #004085; }
+
+/* Loading Overlay for Async Actions */
+.adceinvoice-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.adceinvoice-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    animation: adc-spin 1s linear infinite;
+}
+@keyframes adc-spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
