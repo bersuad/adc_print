@@ -42,9 +42,11 @@ class AdcAuthService
      *
      * @param string $username API username.
      * @param string $password API password.
+     * @param string $tin API TIN number.
+     * @param string $deviceId Fiscal Device ID.
      * @return string|null The valid token or null on failure.
      */
-    public function getValidToken($username, $password)
+    public function getValidToken($username, $password, $tin, $deviceId)
     {
         $currentToken = $this->getTokenFromDb();
 
@@ -54,7 +56,7 @@ class AdcAuthService
         }
 
         AdcLogger::info('Auth token missing or expired, fetching a new one');
-        return $this->authenticate($username, $password);
+        return $this->authenticate($username, $password, $tin, $deviceId);
     }
 
     /**
@@ -62,26 +64,39 @@ class AdcAuthService
      *
      * @param string $username API username.
      * @param string $password API password.
+     * @param string $tin TIN number.
+     * @param string $deviceId Fiscal Device ID.
      * @return string|null The new token or null on failure.
      */
-    public function authenticate($username, $password)
+    public function authenticate($username, $password, $tin, $deviceId)
     {
         try {
             $payload = [
-                'username' => $username,
-                'password' => $password
+                'tin_no' => $tin,
+                'client' => 'WEB'
             ];
 
-            $response = $this->apiClient->post('/udfs_api/authenticate', $payload);
+            // Set Basic Auth credentials
+            $this->apiClient->setBasicAuth($username, $password);
 
-            if (isset($response['token']) && isset($response['expires_in'])) {
-                // Calculate expiration date
-                $expiresAt = date('Y-m-d H:i:s', time() + (int)$response['expires_in']);
-                $this->saveTokenToDb($response['token'], $expiresAt);
-                return $response['token'];
+            $headers = [
+                'Device-ID: ' . $deviceId
+            ];
+
+            $response = $this->apiClient->post('/authenticate', $payload, $headers);
+
+            if (isset($response['status']) && (int)$response['status'] === 0) {
+                $token = $response['data']['access_token'] ?? null;
+                $expiresIn = $response['data']['expires_in'] ?? 3600;
+
+                if ($token) {
+                    $expiresAt = date('Y-m-d H:i:s', time() + (int)$expiresIn);
+                    $this->saveTokenToDb($token, $expiresAt);
+                    return $token;
+                }
             }
 
-            AdcLogger::error('Invalid auth response structure', ['response' => $response]);
+            AdcLogger::error('Invalid auth response or auth failed', ['response' => $response]);
             return null;
 
         } catch (Exception $e) {

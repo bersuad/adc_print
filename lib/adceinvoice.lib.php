@@ -196,11 +196,13 @@ function adceinvoice_build_api_item($line, int $lineNumber): array
     if (!empty($line->fk_tva) && $line->fk_tva > 0) {
         // Map Dolibarr tax rate to ADC code
         $taxRate = (float)$line->fk_tva;
-        $taxCode = match(true) {
-            $taxRate == 0 => 'VAT0',
-            $taxRate == 15 => 'VAT15',
-            default => 'VAT'.$taxRate,
-        };
+        if ($taxRate == 0) {
+            $taxCode = 'VAT0';
+        } elseif ($taxRate == 15) {
+            $taxCode = 'VAT15';
+        } else {
+            $taxCode = 'VAT'.$taxRate;
+        }
     }
     
     $preTaxValue = adceinvoice_format_amount($line->subprice * $line->qty);

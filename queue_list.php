@@ -332,14 +332,14 @@ if ($num > 0) {
         print '<td><strong>'.dol_escape_htmltag($obj->trnx_id).'</strong></td>';
         
         // Transaction type
-        $typeLabel = match($obj->transaction_type) {
-            'INV' => 'Invoice',
-            'CRE' => 'Credit Note',
-            'DEB' => 'Debit Note',
-            'RECEIPT' => 'Receipt',
-            'CANCEL' => 'Cancellation',
-            default => $obj->transaction_type,
-        };
+        switch ($obj->transaction_type) {
+            case 'INV': $typeLabel = 'Invoice'; break;
+            case 'CRE': $typeLabel = 'Credit Note'; break;
+            case 'DEB': $typeLabel = 'Debit Note'; break;
+            case 'RECEIPT': $typeLabel = 'Receipt'; break;
+            case 'CANCEL': $typeLabel = 'Cancellation'; break;
+            default: $typeLabel = $obj->transaction_type; break;
+        }
         print '<td>'.$langs->trans($typeLabel).'</td>';
         
         // Business type
@@ -361,13 +361,13 @@ if ($num > 0) {
         print '</td>';
         
         // Status with color
-        $statusClass = match($obj->status) {
-            'pending' => 'warning',
-            'processing' => 'info',
-            'synced' => 'success',
-            'failed' => 'error',
-            default => '',
-        };
+        switch ($obj->status) {
+            case 'pending': $statusClass = 'warning'; break;
+            case 'processing': $statusClass = 'info'; break;
+            case 'synced': $statusClass = 'success'; break;
+            case 'failed': $statusClass = 'error'; break;
+            default: $statusClass = ''; break;
+        }
         print '<td><span class="status'.$statusClass.'">'.$langs->trans('AdcEinvoiceStatus'.ucfirst($obj->status)).'</span></td>';
         
         // Attempts
@@ -435,12 +435,12 @@ if ($resStats && $db->num_rows($resStats) > 0) {
     print '<td class="right">'.$langs->trans('TotalAttempts').'</td></tr>';
     
     while ($stat = $db->fetch_object($resStats)) {
-        $class = match($stat->status) {
-            'pending' => 'warning',
-            'failed' => 'error',
-            'synced' => 'success',
-            default => ''
-        };
+        switch ($stat->status) {
+            case 'pending': $class = 'warning'; break;
+            case 'failed': $class = 'error'; break;
+            case 'synced': $class = 'success'; break;
+            default: $class = ''; break;
+        }
         print '<tr class="oddeven"><td><span class="status'.$class.'">';
         print $langs->trans('AdcEinvoiceStatus'.ucfirst($stat->status));
         print '</span></td>';

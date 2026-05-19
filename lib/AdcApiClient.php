@@ -25,6 +25,11 @@ class AdcApiClient
     private $timeout = 30;
 
     /**
+     * @var string|null Basic Auth credentials
+     */
+    private $basicAuth = null;
+
+    /**
      * AdcApiClient constructor.
      *
      * @param string $baseUrl The base URL of the API.
@@ -43,6 +48,19 @@ class AdcApiClient
     public function setTimeout($timeout)
     {
         $this->timeout = (int)$timeout;
+        return $this;
+    }
+
+    /**
+     * Set Basic Authentication credentials.
+     *
+     * @param string $username
+     * @param string $password
+     * @return self
+     */
+    public function setBasicAuth($username, $password)
+    {
+        $this->basicAuth = $username . ':' . $password;
         return $this;
     }
 
@@ -91,6 +109,15 @@ class AdcApiClient
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+
+        // Disable SSL verification for ADC test environment certificate mismatch
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+        if ($this->basicAuth !== null) {
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD, $this->basicAuth);
+        }
 
         // Standard JSON headers
         $defaultHeaders = [

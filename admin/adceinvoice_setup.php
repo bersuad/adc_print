@@ -7,6 +7,7 @@
 
 require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 require_once __DIR__.'/../lib/AdcApiClient.php';
 require_once __DIR__.'/../lib/AdcAuthService.php';
 
@@ -18,6 +19,7 @@ if (!$user->admin) {
 // Parameters
 $action = GETPOST('action', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
+$token = GETPOST('token', 'alpha');
 
 // Language
 $langs->loadLangs(['admin', 'adceinvoice@adceinvoice']);
@@ -37,9 +39,7 @@ if ($action == 'update' && !empty($token)) {
         'ADCEINVOICE_API_PASSWORD',
         'ADCEINVOICE_TIN',
         'ADCEINVOICE_DEVICE_ID',
-        'ADCEINVOICE_CLIENT_TYPE',
-        'ADCEINVOICE_AUTO_SYNC',
-        'ADCEINVOICE_PRINT_ENABLED',
+        
     ];
     
     foreach ($constNames as $constName) {
@@ -48,7 +48,7 @@ if ($action == 'update' && !empty($token)) {
         // Encrypt password field
         if ($constName === 'ADCEINVOICE_API_PASSWORD') {
             if (!empty($value)) {
-                $value = dol_encrypt($value);
+                $value = dolEncrypt($value);
             } else {
                 // Keep existing value if empty
                 continue;
@@ -62,9 +62,7 @@ if ($action == 'update' && !empty($token)) {
     dolibarr_set_const($db, 'ADCEINVOICE_AUTO_SYNC', GETPOST('ADCEINVOICE_AUTO_SYNC', 'int'), 'bool', 0, '', $conf->entity);
     dolibarr_set_const($db, 'ADCEINVOICE_PRINT_ENABLED', GETPOST('ADCEINVOICE_PRINT_ENABLED', 'int'), 'bool', 0, '', $conf->entity);
     
-    // Clear cached token on config change
-    $cacheFile = $conf->cache_dir.'/adceinvoice_access_token.cache';
-    @unlink($cacheFile);
+    // Note: Token clearing is handled internally by AdcAuthService in the DB now.
     
     setEventMessages($langs->trans('SetupSaved'), null, 'mesgs');
     header('Location: '.$_SERVER['PHP_SELF']);
@@ -72,14 +70,27 @@ if ($action == 'update' && !empty($token)) {
 }
 
 if ($action == 'test_connection') {
-    // Test API connection
-    $username = getDolGlobalString('ADCEINVOICE_API_USERNAME');
-    $password = getDolGlobalString('ADCEINVOICE_API_PASSWORD');
-    if (!empty($password)) {
-        $password = dol_decrypt($password);
+    // Test API connection using POST data if provided, otherwise fallback to DB
+    $username = GETPOST('ADCEINVOICE_API_USERNAME', 'alpha') ?: getDolGlobalString('ADCEINVOICE_API_USERNAME');
+    $password = GETPOST('ADCEINVOICE_API_PASSWORD', 'none'); // Use 'none' to avoid stripping special chars in password
+    
+    if (empty($password)) {
+        // If password wasn't submitted in the form, try grabbing the encrypted one from DB
+        $password = getDolGlobalString('ADCEINVOICE_API_PASSWORD');
+        if (!empty($password)) {
+            $password = dolDecrypt($password);
+        }
     }
     
-    $testResult = $authService->authenticate($username, $password);
+    $tin = GETPOST('ADCEINVOICE_TIN', 'alpha') ?: getDolGlobalString('ADCEINVOICE_TIN');
+    $deviceId = GETPOST('ADCEINVOICE_DEVICE_ID', 'alpha') ?: getDolGlobalString('ADCEINVOICE_DEVICE_ID');
+
+    // Re-initialize API client with the dynamic URL from POST/DB
+    $apiUrl = GETPOST('ADCEINVOICE_API_URL', 'alpha') ?: getDolGlobalString('ADCEINVOICE_API_URL');
+    $apiClient = new AdcApiClient($apiUrl);
+    $authService = new AdcAuthService($db, $apiClient);
+    
+    $testResult = $authService->authenticate($username, $password, $tin, $deviceId);
     
     if ($testResult) {
         setEventMessages($langs->trans('AdcEinvoiceConnectionSuccess'), null, 'mesgs');
@@ -135,15 +146,7 @@ print '<td><input type="text" name="ADCEINVOICE_DEVICE_ID" id="ADCEINVOICE_DEVIC
 print '<td class="opacitymedium">'.$langs->trans('AdcEinvoiceDeviceIdDesc').'</td></tr>';
 
 // Client Type
-print '<tr class="oddeven"><td><label for="ADCEINVOICE_CLIENT_TYPE">'.$langs->trans('AdcEinvoiceClientType').'</label></td>';
-print '<td>';
-print '<select name="ADCEINVOICE_CLIENT_TYPE" id="ADCEINVOICE_CLIENT_TYPE">';
-foreach (['WEB', 'POS', 'MOBILE'] as $type) {
-    $selected = (getDolGlobalString('ADCEINVOICE_CLIENT_TYPE') === $type) ? ' selected' : '';
-    print '<option value="'.$type.'"'.$selected.'>'.$type.'</option>';
-}
-print '</select></td>';
-print '<td class="opacitymedium">'.$langs->trans('AdcEinvoiceClientTypeDesc').'</td></tr>';
+
 
 print '</table>';
 
@@ -190,7 +193,6 @@ $statusChecks = [
     'PHP cURL Extension' => extension_loaded('curl'),
     'PHP JSON Extension' => extension_loaded('json'),
     'PHP OpenSSL' => extension_loaded('openssl'),
-    'Config Writable' => is_writable($conf->cache_dir),
     'TIN Configured' => !empty(getDolGlobalString('ADCEINVOICE_TIN')),
     'Device ID Configured' => !empty(getDolGlobalString('ADCEINVOICE_DEVICE_ID')),
 ];
